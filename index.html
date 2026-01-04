@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TsumQMA - 相棒と学ぶ教育クイズ</title>
+  <link rel="stylesheet" href="/style.css">
+  <!-- Howler.js: オーディオライブラリ（CDNから読み込み） -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+  <!-- Chart.js: グラフ描画ライブラリ -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div id="app">
+    <!-- マイページ（メイン画面） -->
+    <div id="main-page" class="screen">
+      <div class="main-container">
+        <!-- 左側：ステータスエリア -->
+        <div class="main-left">
+          <div class="character-showcase">
+            <div class="character-frame" id="main-character-frame">
+              <!-- キャラクター画像は後で配置 -->
+              <div class="character-placeholder" id="main-character-avatar"></div>
+            </div>
+            <div class="character-info">
+              <h2 class="character-title" id="main-character-name">相棒を選ぼう</h2>
+              <div class="level-badge-main">Lv.<span id="main-level">1</span></div>
+            </div>
+
+            <!-- セリフ吹き出し -->
+            <div class="speech-bubble" id="character-speech" style="display: none;">
+              <div class="speech-text" id="speech-text"></div>
+            </div>
+          </div>
+
+          <div class="exp-section">
+            <div class="exp-label">経験値</div>
+            <div class="exp-bar-container-main">
+              <div class="exp-bar-main" id="main-exp-bar"></div>
+            </div>
+            <div class="exp-text-main"><span id="main-current-exp">0</span>/<span id="main-max-exp">100</span></div>
+          </div>
+
+          <div class="radar-section">
+            <h3 class="section-title">あなたのスキル</h3>
+            <div class="radar-chart-container-main">
+              <canvas id="main-radar-chart" width="300" height="300"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右側：ジャンル選択 -->
+        <div class="main-right">
+          <h1 class="main-title">学びのステージ</h1>
+          <div class="genre-tiles" id="genre-tiles"></div>
+
+          <!-- 音量調整（控えめ） -->
+          <div class="volume-section">
+            <div class="volume-item">
+              <span class="volume-icon">🔊</span>
+              <input type="range" id="quick-master-volume" class="volume-slider" min="0" max="100" value="70">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- キャラクター選択画面（初回のみ） -->
+    <div id="character-select" class="screen">
+      <h1 class="title">🌟 相棒を選ぼう！ 🌟</h1>
+      <p class="subtitle">一緒に学んでいく相棒を選んでね</p>
+      <div class="character-grid" id="character-grid"></div>
+    </div>
+
+    <!-- カウントダウン画面 -->
+    <div id="countdown-screen" class="screen">
+      <div class="countdown-display" id="countdown-display"></div>
+    </div>
+
+    <!-- メインゲーム画面 -->
+    <div id="game-screen" class="screen">
+      <!-- ヘッダー（ステータス表示） -->
+      <header class="game-header">
+        <div class="player-info">
+          <div class="character-display" id="player-character">
+            <div class="character-avatar" id="character-avatar"></div>
+            <div class="character-name" id="character-name"></div>
+          </div>
+          <div class="level-info">
+            <div class="level-badge">Lv.<span id="player-level">1</span></div>
+            <div class="exp-bar-container">
+              <div class="exp-bar" id="exp-bar"></div>
+            </div>
+            <div class="exp-text"><span id="current-exp">0</span>/<span id="max-exp">100</span></div>
+          </div>
+        </div>
+        <div class="game-stats">
+          <div class="stat-item">
+            <span class="stat-label">スコア</span>
+            <span class="stat-value" id="score">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">コンボ</span>
+            <span class="stat-value combo" id="combo">0</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- クイズエリア -->
+      <main class="quiz-area">
+        <div class="question-container">
+          <div class="question-number">問題 <span id="question-number">1</span></div>
+          <div class="question-text" id="question-text"></div>
+        </div>
+
+        <div class="answer-grid" id="answer-grid"></div>
+
+        <div class="quiz-footer">
+          <div class="time-display">
+            <span class="time-icon">⏱️</span>
+            <span class="time-value" id="time-left">60</span>
+          </div>
+          <div class="footer-buttons">
+            <button class="btn-secondary" id="btn-volume">🔊</button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- ステータス画面 -->
+    <div id="status-screen" class="screen">
+      <div class="status-header">
+        <h2>📊 ステータス</h2>
+        <button class="btn-close" id="btn-close-status">✕</button>
+      </div>
+      <div class="status-content">
+        <div class="character-detail">
+          <div class="character-avatar-large" id="status-avatar"></div>
+          <h3 id="status-character-name"></h3>
+          <div class="level-badge-large">Lv.<span id="status-level">1</span></div>
+          <div class="player-name-display">
+            <span>プレイヤー：<strong id="display-player-name"></strong></span>
+            <button class="btn-edit-name" id="btn-edit-player-name">✏️ 名前変更</button>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-info">
+              <div class="stat-label">正解率</div>
+              <div class="stat-value"><span id="accuracy">0</span>%</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✨</div>
+            <div class="stat-info">
+              <div class="stat-label">最大コンボ</div>
+              <div class="stat-value"><span id="max-combo">0</span></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div class="stat-info">
+              <div class="stat-label">総解答数</div>
+              <div class="stat-value"><span id="total-answers">0</span></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-info">
+              <div class="stat-label">総スコア</div>
+              <div class="stat-value"><span id="total-score">0</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="skills-section">
+          <h3>🎓 スキル一覧</h3>
+          <div class="skills-grid">
+            <!-- AIスキル -->
+            <div class="skill-card active">
+              <div class="skill-card-header">
+                <span class="skill-icon">🤖</span>
+                <h4 class="skill-name">AI活用</h4>
+              </div>
+              <div class="skill-level">Lv.<span id="ai-skill-level">1</span></div>
+              <div class="skill-substats">
+                <div class="radar-chart-container-skill">
+                  <canvas id="ai-skill-radar"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- ライティングスキル -->
+            <div class="skill-card active">
+              <div class="skill-card-header">
+                <span class="skill-icon">✍️</span>
+                <h4 class="skill-name">ライティング</h4>
+              </div>
+              <div class="skill-level">Lv.<span id="writing-skill-level">1</span></div>
+              <div class="skill-substats">
+                <div class="radar-chart-container-skill">
+                  <canvas id="writing-skill-radar"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- デザインスキル（鍵） -->
+            <div class="skill-card locked">
+              <div class="skill-card-header">
+                <span class="skill-icon">🎨</span>
+                <h4 class="skill-name">デザイン</h4>
+              </div>
+              <div class="skill-lock">🔒</div>
+            </div>
+
+            <!-- マーケティングスキル（鍵） -->
+            <div class="skill-card locked">
+              <div class="skill-card-header">
+                <span class="skill-icon">📢</span>
+                <h4 class="skill-name">マーケティング</h4>
+              </div>
+              <div class="skill-lock">🔒</div>
+            </div>
+
+            <!-- 構築スキル（鍵） -->
+            <div class="skill-card locked">
+              <div class="skill-card-header">
+                <span class="skill-icon">⚙️</span>
+                <h4 class="skill-name">構築</h4>
+              </div>
+              <div class="skill-lock">🔒</div>
+            </div>
+
+            <!-- その他スキル（鍵） -->
+            <div class="skill-card locked">
+              <div class="skill-card-header">
+                <span class="skill-icon">💡</span>
+                <h4 class="skill-name">その他</h4>
+              </div>
+              <div class="skill-lock">🔒</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- リザルト画面 -->
+    <div id="result-screen" class="screen">
+      <button class="btn-home" id="btn-home-result">🏠 ホーム</button>
+      <h2 class="result-title">クイズ終了！</h2>
+      <div class="result-character" id="result-character"></div>
+      <div class="level-up-notice" id="level-up-notice"></div>
+      <div class="result-stats">
+        <div class="result-item">
+          <span class="result-label">獲得スコア</span>
+          <span class="result-value" id="final-score">0</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">正解数</span>
+          <span class="result-value" id="correct-count">0</span>/<span id="total-count">0</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">最大コンボ</span>
+          <span class="result-value combo" id="result-combo">0</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">獲得EXP</span>
+          <span class="result-value exp" id="gained-exp">0</span>
+        </div>
+      </div>
+      <div class="result-buttons">
+        <button class="btn-primary" id="btn-continue">続ける</button>
+      </div>
+    </div>
+
+    <!-- ボリューム調整モーダル -->
+    <div id="volume-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>🔊 音量調整</h3>
+          <button class="btn-close" id="btn-close-volume">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="volume-control">
+            <label for="master-volume">マスター音量</label>
+            <input type="range" id="master-volume" min="0" max="100" value="70">
+            <span id="master-volume-value">70%</span>
+          </div>
+          <div class="volume-control">
+            <label for="bgm-volume">BGM音量</label>
+            <input type="range" id="bgm-volume" min="0" max="100" value="50">
+            <span id="bgm-volume-value">50%</span>
+          </div>
+          <div class="volume-control">
+            <label for="se-volume">SE音量</label>
+            <input type="range" id="se-volume" min="0" max="100" value="80">
+            <span id="se-volume-value">80%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 孵化演出モーダル -->
+    <div id="hatch-modal" class="modal">
+      <div class="modal-content hatch-modal-content">
+        <div class="hatch-animation-container">
+          <div class="hatch-message" id="hatch-message">おや…？ 卵の様子が…！</div>
+          <div class="character-hatch-image" id="hatch-character-image"></div>
+          <div class="hatch-celebration" id="hatch-celebration" style="display: none;">
+            <h2>🎉 おめでとう！ 🎉</h2>
+            <p>相棒が生まれたよ！</p>
+          </div>
+          <div class="name-input-container" id="name-input-container" style="display: none;">
+            <h3>この子に名前をつけてください</h3>
+            <input type="text" id="character-name-input" maxlength="10" placeholder="名前を入力">
+            <button class="btn-primary" id="btn-confirm-name">決定</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- プレイヤー名入力モーダル -->
+    <div id="player-name-modal" class="modal">
+      <div class="modal-content player-name-modal-content">
+        <div class="player-name-container">
+          <h2>🌟 あなたのお名前を教えてください 🌟</h2>
+          <p>相棒があなたを呼ぶ名前です</p>
+          <input type="text" id="player-name-input" maxlength="10" placeholder="お名前を入力">
+          <button class="btn-primary" id="btn-confirm-player-name">決定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/main.js"></script>
+</body>
+</html>

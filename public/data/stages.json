@@ -1,0 +1,62 @@
+[
+  {
+    "id": "ai",
+    "name": "AI活用",
+    "icon": "🤖",
+    "description": "AIとの付き合い方を学ぼう",
+    "color": "#4CAF50",
+    "locked": false,
+    "comingSoon": false,
+    "quizFile": "ai.json"
+  },
+  {
+    "id": "writing",
+    "name": "ライティング",
+    "icon": "✍️",
+    "description": "文章力を磨こう",
+    "color": "#2196F3",
+    "locked": false,
+    "comingSoon": false,
+    "quizFile": "writing.json"
+  },
+  {
+    "id": "design",
+    "name": "デザイン",
+    "icon": "🎨",
+    "description": "デザインの基礎を学ぼう",
+    "color": "#E91E63",
+    "locked": true,
+    "comingSoon": true,
+    "quizFile": "design.json"
+  },
+  {
+    "id": "marketing",
+    "name": "マーケティング",
+    "icon": "📢",
+    "description": "マーケティングを理解しよう",
+    "color": "#FF9800",
+    "locked": true,
+    "comingSoon": true,
+    "quizFile": "marketing.json"
+  },
+  {
+    "id": "coding",
+    "name": "構築",
+    "icon": "⚙️",
+    "description": "プログラミングの基礎",
+    "color": "#9C27B0",
+    "locked": true,
+    "comingSoon": true,
+    "quizFile": "coding.json"
+  },
+  {
+    "id": "other",
+    "name": "その他",
+    "icon": "💡",
+    "description": "その他のスキル",
+    "color": "#607D8B",
+    "locked": true,
+    "comingSoon": true,
+    "quizFile": "other.json"
+  }
+]
